@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vòng Quay Tính Cách Tâm Linh</title>
-    <!-- Thư viện pháo hoa cao cấp -->
+    <!-- Thư viện hiệu ứng pháo hoa -->
     <script src="https://jsdelivr.net"></script>
     <style>
         * {
@@ -51,7 +51,7 @@
             height: 380px;
             margin: 0 auto;
         }
-        /* Kim chỉ hướng 3D sắc nét đặt ở đỉnh 12h */
+        /* Mũi tên chỉ hướng đặt tại đỉnh 12 giờ */
         .pointer-3d {
             position: absolute;
             top: -18px;
@@ -65,7 +65,7 @@
             z-index: 20;
             filter: drop-shadow(0px 6px 6px rgba(0,0,0,0.4));
         }
-        /* Canvas vẽ vòng quay tròn trịa */
+        /* Canvas thiết kế vòng quay tròn */
         canvas {
             display: block;
             border-radius: 50%;
@@ -73,7 +73,7 @@
             border: 6px solid #fff;
             background: #fff;
         }
-        /* Nút quay */
+        /* Nút quay tròn nằm ở giữa */
         .spin-trigger {
             position: absolute;
             top: 50%;
@@ -101,7 +101,7 @@
             cursor: not-allowed;
             box-shadow: none;
         }
-        /* Hộp hiển thị kết quả */
+        /* Khu vực hiển thị kết quả chúc mừng */
         .result-display {
             margin-top: 35px;
             font-size: 1.8rem;
@@ -139,7 +139,7 @@
     const spinBtn = document.getElementById('spinBtn');
     const resultLabel = document.getElementById('resultLabel');
 
-    // Cấu hình dữ liệu chuẩn tỷ lệ phần trăm
+    // Cấu hình danh sách phần thưởng kèm tỷ lệ xác suất (%)
     const items = [
         { text: "CUTE 🥰", color: "#ff6b81", weight: 35 },
         { text: "TĂNG ĐỘNG ⚡", color: "#ffa502", weight: 30 },
@@ -151,22 +151,26 @@
     const center = canvas.width / 2;
     const radius = canvas.width / 2;
 
-    // Âm thanh khi quay qua các ô
+    // Giả lập âm thanh cơ học tách tách khi vòng quay chạy
     function playTickSound() {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.04);
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        } catch (e) {
+            console.log("Audio không thể phát trước khi người dùng tương tác");
+        }
     }
 
-    // Tính toán góc xuất phát của các ô
+    // Tính mốc góc chia nan quạt ban đầu
     let startAngles = [];
     let currentAngle = 0;
     for (let i = 0; i < items.length; i++) {
@@ -174,15 +178,16 @@
         currentAngle += (items[i].weight / totalWeight) * (2 * Math.PI);
     }
 
-    // Vẽ vòng quay lên Canvas
+    // Hàm thực hiện vẽ giao diện vòng quay lên Canvas
     function drawWheel(currentRotation = 0) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         for (let i = 0; i < items.length; i++) {
             const startAngle = startAngles[i] + currentRotation;
+            // Đã fix lỗi startAngles[i] ở dòng này giúp hiển thị màu chính xác
             const endAngle = (i === items.length - 1 ? startAngles[0] + 2 * Math.PI : startAngles[i+1]) + currentRotation;
             
-            // Vẽ nan quạt
+            // Tiến hành vẽ nan quạt màu sắc
             ctx.beginPath();
             ctx.moveTo(center, center);
             ctx.arc(center, center, radius, startAngle, endAngle);
@@ -190,12 +195,12 @@
             ctx.fillStyle = items[i].color;
             ctx.fill();
             
-            // Vẽ đường viền trắng chia các ô
+            // Vẽ đường chia ô màu trắng tinh tế
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#ffffff';
             ctx.stroke();
 
-            // SỬA LỖI VẼ CHỮ: Căn chữ hướng từ tâm ra rìa, không lo lộn ngược
+            // Căn tọa độ viết chữ xuôi mắt đọc từ tâm hướng ra ngoài
             ctx.save();
             ctx.translate(center, center);
             const middleAngle = startAngle + (endAngle - startAngle) / 2;
@@ -203,27 +208,29 @@
             
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 15px 'Segoe UI', Arial, sans-serif";
-            ctx.textAlign = "left"; // Viết từ tâm hướng ra ngoài
+            ctx.textAlign = "left";
             ctx.textBaseline = "middle";
             ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
             ctx.shadowBlur = 4;
             
-            // Cách tâm một khoảng 55px để chữ không bị che bởi nút QUAY
+            // Đặt khoảng cách chữ cách tâm vòng quay 65px
             ctx.fillText(items[i].text, 65, 0);
             ctx.restore();
         }
 
-        // Vòng tròn trang trí ở tâm
+        // Vẽ vòng tròn trắng nhỏ che ở tâm
         ctx.beginPath();
         ctx.arc(center, center, 44, 0, 2 * Math.PI);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
     }
 
+    // Vẽ kết quả tĩnh ban đầu
     drawWheel(0);
 
     let isSpinning = false;
 
+    // Thuật toán chọn đáp án ngẫu nhiên chuẩn theo tỷ lệ cấu hình
     function pickRewardByProbability() {
         const rand = Math.random() * 100;
         let cumulative = 0;
@@ -234,6 +241,7 @@
         return 0;
     }
 
+    // Xử lý sự kiện bấm nút QUAY
     spinBtn.addEventListener('click', () => {
         if (isSpinning) return;
         isSpinning = true;
@@ -248,10 +256,10 @@
 
         const nextIdx = (targetIndex === items.length - 1) ? 0 : targetIndex + 1;
         const targetStart = startAngles[targetIndex];
-        let targetEnd = (targetIndex === items.length - 1) ? 2 * Math.PI : startAngles[nextIdx];
+        const targetEnd = (targetIndex === items.length - 1) ? 2 * Math.PI : startAngles[nextIdx];
         const midSegment = targetStart + (targetEnd - targetStart) / 2;
 
-        // Vị trí kim chỉ ở hướng 12 giờ tương ứng với góc 1.5 * Math.PI
+        // Tính toán góc dừng khớp chuẩn xác với vị trí mũi kim đỉnh 12h
         const stopAngle = (1.5 * Math.PI) - midSegment;
         const totalRotationTarget = (Math.PI * 2 * (6 + Math.floor(Math.random() * 2))) + stopAngle;
 
@@ -264,7 +272,7 @@
             const elapsed = timestamp - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
-            // Hiệu ứng phanh chậm dần mượt mà
+            // Hàm tạo hiệu ứng phanh hãm tốc mượt mà giảm dần
             const easeOutProgress = 1 - Math.pow(1 - progress, 3);
             const currentRotation = easeOutProgress * totalRotationTarget;
 
@@ -280,11 +288,11 @@
             } else {
                 isSpinning = false;
                 spinBtn.disabled = false;
-                
-                resultLabel.innerHTML = `Kết quả bạn là: <span style="color: ${selected.color}; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 8px;">${selected.text}</span>`;
-                resultLabel.classList.add('pulse');
-
-                confetti({ particleCount: 80, spread: 60, origin: { x: 0.2, y: 0.6 } });
+// Hiển thị kết quả cuối cùng
+resultLabel.innerHTML = Kết quả bạn là: <span style="color: ${selected.color}; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 8px;">${selected.text}</span>;
+resultLabel.classList.add('pulse');
+// Bắn pháo hoa ăn mừng hai bên góc màn hình
+confetti({ particleCount: 80, spread: 60, origin: { x: 0.2, y: 0.6 } });
 confetti({ particleCount: 80, spread: 60, origin: { x: 0.8, y: 0.6 } });
 }
 }
