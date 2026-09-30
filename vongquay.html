@@ -13,8 +13,7 @@
             padding: 0;
         }
         body {
-            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(circle, #fbc531 0%, #718093 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             flex-direction: column;
@@ -52,7 +51,7 @@
             height: 380px;
             margin: 0 auto;
         }
-        /* Kim chỉ hướng thiết kế 3D sắc nét đặt ở đỉnh 12h */
+        /* Kim chỉ hướng 3D sắc nét đặt ở đỉnh 12h */
         .pointer-3d {
             position: absolute;
             top: -18px;
@@ -74,7 +73,7 @@
             border: 6px solid #fff;
             background: #fff;
         }
-        /* Nút quay hiệu ứng gương bóng bẩy */
+        /* Nút quay */
         .spin-trigger {
             position: absolute;
             top: 50%;
@@ -92,11 +91,6 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.4), inset 0 -3px 0 #dcdde1;
             z-index: 10;
             transition: all 0.15s ease;
-            letter-spacing: 0.5px;
-        }
-        .spin-trigger:hover {
-            background: #f5f6fa;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         }
         .spin-trigger:active {
             transform: translate(-50%, -50%) scale(0.92);
@@ -107,14 +101,13 @@
             cursor: not-allowed;
             box-shadow: none;
         }
-        /* Hộp hiển thị kết quả hoạt họa */
+        /* Hộp hiển thị kết quả */
         .result-display {
             margin-top: 35px;
             font-size: 1.8rem;
             font-weight: 700;
             min-height: 50px;
             text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
         }
         .pulse {
             animation: pulseAnim 1s infinite alternate;
@@ -146,7 +139,7 @@
     const spinBtn = document.getElementById('spinBtn');
     const resultLabel = document.getElementById('resultLabel');
 
-    // Cấu hình dữ liệu chuẩn tỷ lệ phần trăm theo yêu cầu
+    // Cấu hình dữ liệu chuẩn tỷ lệ phần trăm
     const items = [
         { text: "CUTE 🥰", color: "#ff6b81", weight: 35 },
         { text: "TĂNG ĐỘNG ⚡", color: "#ffa502", weight: 30 },
@@ -158,27 +151,26 @@
     const center = canvas.width / 2;
     const radius = canvas.width / 2;
 
-    // Giả lập âm thanh cơ học (Web Audio API) để tạo hiệu ứng tích tắc khi quay qua các ô
+    // Âm thanh khi quay qua các ô
     function playTickSound() {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.05);
+        osc.stop(audioCtx.currentTime + 0.04);
     }
 
-    // Tính toán góc (độ Radian) cho từng ô dựa trên phần trăm diện tích
+    // Tính toán góc xuất phát của các ô
     let startAngles = [];
     let currentAngle = 0;
     for (let i = 0; i < items.length; i++) {
         startAngles.push(currentAngle);
-        // Đổi từ tỷ lệ % sang góc Radian (360 độ = 2 * Math.PI)
         currentAngle += (items[i].weight / totalWeight) * (2 * Math.PI);
     }
 
@@ -190,7 +182,7 @@
             const startAngle = startAngles[i] + currentRotation;
             const endAngle = (i === items.length - 1 ? startAngles[0] + 2 * Math.PI : startAngles[i+1]) + currentRotation;
             
-            // Vẽ nan quạt miếng bánh
+            // Vẽ nan quạt
             ctx.beginPath();
             ctx.moveTo(center, center);
             ctx.arc(center, center, radius, startAngle, endAngle);
@@ -198,43 +190,40 @@
             ctx.fillStyle = items[i].color;
             ctx.fill();
             
-            // Vẽ đường viền trắng tinh tế chia cách các ô
+            // Vẽ đường viền trắng chia các ô
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#ffffff';
             ctx.stroke();
 
-            // Tính toán viết chữ căn giữa nan quạt chuẩn xác tuyệt đối
+            // SỬA LỖI VẼ CHỮ: Căn chữ hướng từ tâm ra rìa, không lo lộn ngược
             ctx.save();
             ctx.translate(center, center);
             const middleAngle = startAngle + (endAngle - startAngle) / 2;
             ctx.rotate(middleAngle);
             
-            // Thiết lập phong cách chữ sắc nét
             ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 16px 'Montserrat', sans-serif";
-            ctx.textAlign = "right";
+            ctx.font = "bold 15px 'Segoe UI', Arial, sans-serif";
+            ctx.textAlign = "left"; // Viết từ tâm hướng ra ngoài
             ctx.textBaseline = "middle";
-            ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+            ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
             ctx.shadowBlur = 4;
             
-            // Đẩy chữ ra rìa vòng quay vừa vặn, không bị dính vào tâm hay mép ngoài
-            ctx.fillText(items[i].text, radius - 25, 0);
+            // Cách tâm một khoảng 55px để chữ không bị che bởi nút QUAY
+            ctx.fillText(items[i].text, 65, 0);
             ctx.restore();
         }
 
-        // Vẽ một vòng tròn nhỏ trang trí ở tâm
+        // Vòng tròn trang trí ở tâm
         ctx.beginPath();
         ctx.arc(center, center, 44, 0, 2 * Math.PI);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
     }
 
-    // Khởi tạo vòng quay ban đầu ở trạng thái tĩnh
     drawWheel(0);
 
     let isSpinning = false;
 
-    // Chọn phần thưởng ngẫu nhiên theo trọng số xác suất (%)
     function pickRewardByProbability() {
         const rand = Math.random() * 100;
         let cumulative = 0;
@@ -249,30 +238,25 @@
         if (isSpinning) return;
         isSpinning = true;
 
-        // Reset trạng thái hiển thị
         resultLabel.classList.remove('pulse');
         resultLabel.style.color = '#fff';
-        resultLabel.innerText = "🔮 Đang thấu thị tính cách...";
+        resultLabel.innerText = "🔮 Đang giải mã tính cách...";
         spinBtn.disabled = true;
 
         const targetIndex = pickRewardByProbability();
         const selected = items[targetIndex];
 
-        // Tìm điểm giữa (theo radian) của ô mục tiêu
         const nextIdx = (targetIndex === items.length - 1) ? 0 : targetIndex + 1;
         const targetStart = startAngles[targetIndex];
         let targetEnd = (targetIndex === items.length - 1) ? 2 * Math.PI : startAngles[nextIdx];
         const midSegment = targetStart + (targetEnd - targetStart) / 2;
 
-        // Vị trí kim chỉ ở hướng 12 giờ chuẩn tương ứng góc 1.5 * Math.PI góc radian trong hệ tọa độ canvas
-        // Cần tính toán góc quay sao cho ô mục tiêu nằm ngay dưới mũi kim khi dừng
+        // Vị trí kim chỉ ở hướng 12 giờ tương ứng với góc 1.5 * Math.PI
         const stopAngle = (1.5 * Math.PI) - midSegment;
-        
-        // Tạo số vòng quay quán tính lớn (từ 6 đến 8 vòng) để tạo hiệu ứng xoay nhanh kịch tính
-        const totalRotationTarget = (Math.PI * 2 * (6 + Math.floor(Math.random() * 3))) + stopAngle;
+        const totalRotationTarget = (Math.PI * 2 * (6 + Math.floor(Math.random() * 2))) + stopAngle;
 
         let startTime = null;
-        const duration = 5000; // Thời gian quay kéo dài hẳn 5 giây tạo hiệu ứng hồi hộp
+        const duration = 5000; 
         let lastTickAngle = 0;
 
         function animateWheel(timestamp) {
@@ -280,3 +264,29 @@
             const elapsed = timestamp - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
+            // Hiệu ứng phanh chậm dần mượt mà
+            const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+            const currentRotation = easeOutProgress * totalRotationTarget;
+
+            if (currentRotation - lastTickAngle > 0.22 && progress < 0.92) {
+                playTickSound();
+                lastTickAngle = currentRotation;
+            }
+
+            drawWheel(currentRotation);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateWheel);
+            } else {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                
+                resultLabel.innerHTML = `Kết quả bạn là: <span style="color: ${selected.color}; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 8px;">${selected.text}</span>`;
+                resultLabel.classList.add('pulse');
+
+                confetti({ particleCount: 80, spread: 60, origin: { x: 0.2, y: 0.6 } });
+confetti({ particleCount: 80, spread: 60, origin: { x: 0.8, y: 0.6 } });
+}
+}
+requestAnimationFrame(animateWheel);
+});
