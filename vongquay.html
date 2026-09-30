@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bạn Nghĩ Mình Như Thế Nào?</title>
+    <!-- Thư viện tạo hiệu ứng pháo hoa -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 2.2rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #34495e;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        .wheel-container {
+            position: relative;
+            width: 360px;
+            height: 360px;
+        }
+        /* Kim chỉ hướng */
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 28px solid #ff4757;
+            z-index: 10;
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.2));
+        }
+        /* Vòng quay chính */
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            position: relative;
+            overflow: hidden;
+            transition: transform 4.5s cubic-bezier(0.1, 0.8, 0.1, 1);
+        }
+        /* Style chung cho các ô */
+        .segment {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            transform-origin: 50% 50%;
+        }
+        .segment span {
+            position: absolute;
+            top: 45px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            font-size: 18px;
+            text-align: center;
+            width: 80px;
+        }
+
+        /* 
+           Cấu hình góc chia (Clip-path) dựa trên tỷ lệ phần trăm:
+           - CUTE: 35% = 126 độ
+           - TĂNG ĐỘNG: 30% = 108 độ
+           - NGHỊCH: 20% = 72 độ
+           - DỞ HƠI: 15% = 54 độ
+        */
+        .seg-cute {
+            background-color: #ff6b81; /* Hồng */
+            clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 84%);
+            transform: rotate(0deg);
+        }
+        .seg-cute span { transform: rotate(63deg); }
+
+        .seg-tangdong {
+            background-color: #ffa502; /* Cam */
+            clip-path: polygon(50% 50%, 100% 84%, 100% 100%, 15% 100%);
+            transform: rotate(0deg);
+        }
+        .seg-tangdong span { transform: rotate(180deg); }
+
+        .seg-nghich {
+            background-color: #2ed573; /* Xanh lá */
+            clip-path: polygon(50% 50%, 15% 100%, 0 100%, 0 45%);
+            transform: rotate(0deg);
+        }
+        .seg-nghich span { transform: rotate(270deg); }
+
+        .seg-dohoi {
+            background-color: #1e90ff; /* Xanh dương */
+            clip-path: polygon(50% 50%, 0 45%, 0 0, 50% 0);
+            transform: rotate(0deg);
+        }
+        .seg-dohoi span { transform: rotate(333deg); }
+
+        /* Nút bấm ở tâm */
+        .spin-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75px;
+            height: 75px;
+            background: #fff;
+            border-radius: 50%;
+            border: none;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            color: #2c3e50;
+            z-index: 5;
+            transition: transform 0.1s;
+        }
+        .spin-btn:active {
+            transform: translate(-50%, -50%) scale(0.93);
+        }
+        /* Bảng kết quả */
+        .result-box {
+            margin-top: 30px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #2c3e50;
+            min-height: 45px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>BẠN NGHĨ MÌNH NHƯ THẾ NÀO?</h1>
+    <h2>TÔI NGHĨ BẠN...</h2>
+
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+            <!-- Ô CUTE: 35% (Góc từ 0 đến 126 độ) -->
+            <div class="segment seg-cute">
+                <span>CUTE 🥰</span>
+            </div>
+            <!-- Ô TĂNG ĐỘNG: 30% (Góc từ 126 đến 234 độ) -->
+            <div class="segment seg-tangdong">
+                <span>TĂNG ĐỘNG ⚡</span>
+            </div>
+            <!-- Ô NGHỊCH: 20% (Góc từ 234 đến 306 độ) -->
+            <div class="segment seg-nghich">
+                <span>NGHỊCH 🐒</span>
+            </div>
+            <!-- Ô DỞ HƠI: 15% (Góc từ 306 đến 360 độ) -->
+            <div class="segment seg-dohoi">
+                <span>DỞ HƠI 🤪</span>
+            </div>
+        </div>
+        <button class="spin-btn" id="spinBtn">QUAY</button>
+    </div>
+
+    <div class="result-box" id="result">Hãy quay để xem kết quả!</div>
+
+    <script>
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const result = document.getElementById('result');
+        
+        let isSpinning = false;
+
+        // Danh sách đáp án đi kèm tỷ lệ và khoảng góc tương ứng (tính ngược chiều kim đồng hồ từ đỉnh)
+        const prizes = [
+            { text: "CUTE 🥰", color: "#ff6b81", minDeg: 234, maxDeg: 360, weight: 35 },
+            { text: "TĂNG ĐỘNG ⚡", color: "#ffa502", minDeg: 126, maxDeg: 234, weight: 30 },
+            { text: "NGHỊCH 🐒", color: "#2ed573", minDeg: 54, maxDeg: 126, weight: 20 },
+            { text: "DỞ HƠI 🤪", color: "#1e90ff", minDeg: 0, maxDeg: 54, weight: 15 }
+        ];
+
+        // Hàm chọn đáp án ngẫu nhiên theo đúng tỷ lệ phần trăm
+        function getRandomPrize() {
+            const rand = Math.random() * 100;
+            let cumulativeWeight = 0;
+            
+            for (let i = 0; i < prizes.length; i++) {
+                cumulativeWeight += prizes[i].weight;
+                if (rand <= cumulativeWeight) {
+                    return prizes[i];
+                }
+            }
+            return prizes[0];
+        }
+
+        spinBtn.addEventListener('click', () => {
+            if (isSpinning) return;
+            isSpinning = true;
+            
+            result.innerText = "Đang xem thấu tâm can...";
+            spinBtn.disabled = true;
+
+            // Lấy đáp án dựa trên thuật toán tỷ lệ %
+            const selectedPrize = getRandomPrize();
+            
+            // Tính toán góc quay để mũi kim (ở vị trí 12h) chỉ đúng vào ô đó
+            const randomAngleInSegment = Math.random() * (selectedPrize.maxDeg - selectedPrize.minDeg) + selectedPrize.minDeg;
+            const extraRounds = 6 * 360; // Quay thêm 6 vòng để tạo hiệu ứng tít mù
+            const totalDegrees = extraRounds + randomAngleInSegment;
+
+            // Thiết lập hiệu ứng xoay bằng CSS
+            wheel.style.transform = `rotate(${totalDegrees}deg)`;
+
+            // Chờ xoay xong (4.5 giây)
+            setTimeout(() => {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                
+                // Hiển thị kết quả trúng thưởng
+                result.innerHTML = `Kết quả: <span style="color: ${selectedPrize.color};">${selectedPrize.text}</span>`;
+                
+                // Bắn pháo hoa ăn mừng
+                confetti({
+                    particleCount: 140,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                // Reset nhẹ góc vòng quay để lần sau quay mượt hơn mà không bị giật ngược
+                wheel.style.transition = 'none';
+                wheel.style.transform = `rotate(${randomAngleInSegment}deg)`;
+                setTimeout(() => {
+                    wheel.style.transition = 'transform 4.5s cubic-bezier(0.1, 0.8, 0.1, 1)';
+                }, 50);
+
+            }, 4500); 
+        });
+    </script>
+</body>
+</html>
