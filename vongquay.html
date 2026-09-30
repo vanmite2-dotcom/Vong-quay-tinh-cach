@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vòng Quay Tính Cách Tâm Linh</title>
+    <title>Giải Mã Tính Cách Bí Ẩn</title>
     <!-- Thư viện hiệu ứng pháo hoa -->
     <script src="https://jsdelivr.net"></script>
     <style>
@@ -14,107 +14,101 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            color: #fff;
-            padding: 20px;
+            overflow: hidden;
         }
         .container {
             text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.65);
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.5);
+            max-width: 450px;
+            width: 90%;
         }
         h1 {
-            font-size: 2.2rem;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            color: #4a4a4a;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
         h2 {
-            font-size: 1.4rem;
+            color: #6b6b6b;
+            font-size: 1.3rem;
             font-weight: 400;
-            margin-bottom: 35px;
-            color: #f5f6fa;
-            opacity: 0.9;
+            margin-bottom: 40px;
         }
-        .wheel-box {
+        /* Khu vực hiển thị Hộp quà / Kết quả */
+        .display-box {
             position: relative;
-            width: 380px;
-            height: 380px;
-            margin: 0 auto;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
         }
-        /* Mũi tên chỉ hướng đặt tại đỉnh 12 giờ */
-        .pointer-3d {
-            position: absolute;
-            top: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 16px solid transparent;
-            border-right: 16px solid transparent;
-            border-top: 32px solid #ea2027;
-            z-index: 20;
-            filter: drop-shadow(0px 6px 6px rgba(0,0,0,0.4));
-        }
-        /* Canvas thiết kế vòng quay tròn */
-        canvas {
-            display: block;
-            border-radius: 50%;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-            border: 6px solid #fff;
-            background: #fff;
-        }
-        /* Nút quay tròn nằm ở giữa */
-        .spin-trigger {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background: #ffffff;
-            color: #2f3640;
-            border-radius: 50%;
-            border: none;
-            font-weight: 800;
-            font-size: 16px;
+        /* Hiệu ứng Emoji hộp quà to, lắc lư */
+        .gift-emoji {
+            font-size: 110px;
             cursor: pointer;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4), inset 0 -3px 0 #dcdde1;
-            z-index: 10;
-            transition: all 0.15s ease;
+            transition: transform 0.2s;
+            animation: shake 1.5s infinite ease-in-out;
         }
-        .spin-trigger:active {
-            transform: translate(-50%, -50%) scale(0.92);
+        @keyframes shake {
+            0% { transform: rotate(0deg) scale(1); }
+            10% { transform: rotate(-8deg) scale(1.05); }
+            20% { transform: rotate(8deg) scale(1.05); }
+            30% { transform: rotate(-6deg) scale(1.05); }
+            40% { transform: rotate(6deg) scale(1.05); }
+            50% { transform: rotate(0deg) scale(1); }
+            100% { transform: rotate(0deg) scale(1); }
         }
-        .spin-trigger:disabled {
-            background: #bdc5cd;
-            color: #7f8c8d;
-            cursor: not-allowed;
-            box-shadow: none;
+        /* Hiệu ứng chữ đáp án khi hiện ra */
+        .result-box {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-        /* Khu vực hiển thị kết quả chúc mừng */
-        .result-display {
-            margin-top: 35px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            min-height: 50px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+        .result-emoji {
+            font-size: 90px;
+            margin-bottom: 10px;
         }
-        .pulse {
-            animation: pulseAnim 1s infinite alternate;
+        .result-text {
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        @keyframes pulseAnim {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        /* Nút bấm */
+        .action-btn {
+            background: linear-gradient(135deg, #ff6b81 0%, #ff4757 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(255, 107, 129, 0.4);
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 129, 0.5);
+        }
+        .action-btn:active {
+            transform: translateY(1px);
         }
     </style>
 </head>
@@ -124,177 +118,96 @@
     <h1>BẠN NGHĨ MÌNH NHƯ THẾ NÀO?</h1>
     <h2>TÔI NGHĨ BẠN...</h2>
 
-    <div class="wheel-box">
-        <div class="pointer-3d"></div>
-        <canvas id="wheelCanvas" width="368" height="368"></canvas>
-        <button class="spin-trigger" id="spinBtn">QUAY</button>
+    <div class="display-box">
+        <!-- Hộp quà mặc định ban đầu -->
+        <div class="gift-emoji" id="giftBox">🎁</div>
+        
+        <!-- Khu vực hiển thị kết quả ẩn ẩn đi lúc đầu -->
+        <div class="result-box" id="resultCard">
+            <div class="result-emoji" id="resEmoji">🥰</div>
+            <div class="result-text" id="resText">CUTE</div>
+        </div>
     </div>
 
-    <div class="result-display" id="resultLabel">🎯 Bấm nút để giải mã!</div>
+    <button class="action-btn" id="actionBtn">MỞ HỘP QUÀ</button>
 </div>
 
 <script>
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
-    const spinBtn = document.getElementById('spinBtn');
-    const resultLabel = document.getElementById('resultLabel');
+    const giftBox = document.getElementById('giftBox');
+    const resultCard = document.getElementById('resultCard');
+    const resEmoji = document.getElementById('resEmoji');
+    const resText = document.getElementById('resText');
+    const actionBtn = document.getElementById('actionBtn');
 
-    // Cấu hình danh sách phần thưởng kèm tỷ lệ xác suất (%)
-    const items = [
-        { text: "CUTE 🥰", color: "#ff6b81", weight: 35 },
-        { text: "TĂNG ĐỘNG ⚡", color: "#ffa502", weight: 30 },
-        { text: "NGHỊCH 🐒", color: "#2ed573", weight: 20 },
-        { text: "DỞ HƠI 🤪", color: "#1e90ff", weight: 15 }
+    // Cấu hình các đáp án, màu chữ và tỷ lệ xác suất thực tế
+    const answers = [
+        { text: "CUTE", emoji: "🥰", color: "#ff6b81", weight: 35 },
+        { text: "TĂNG ĐỘNG", emoji: "⚡", color: "#ffa502", weight: 30 },
+        { text: "NGHỊCH", emoji: "🐒", color: "#2ed573", weight: 20 },
+        { text: "DỞ HƠI", emoji: "🤪", color: "#1e90ff", weight: 15 }
     ];
 
-    const totalWeight = 100;
-    const center = canvas.width / 2;
-    const radius = canvas.width / 2;
+    // Sử dụng biến để kiểm tra xem có phải lượt bấm đầu tiên không
+    let isFirstTurn = true;
+    let isOpen = false;
 
-    // Giả lập âm thanh cơ học tách tách khi vòng quay chạy
-    function playTickSound() {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.04);
-        } catch (e) {
-            console.log("Audio không thể phát trước khi người dùng tương tác");
-        }
-    }
-
-    // Tính mốc góc chia nan quạt ban đầu
-    let startAngles = [];
-    let currentAngle = 0;
-    for (let i = 0; i < items.length; i++) {
-        startAngles.push(currentAngle);
-        currentAngle += (items[i].weight / totalWeight) * (2 * Math.PI);
-    }
-
-    // Hàm thực hiện vẽ giao diện vòng quay lên Canvas
-    function drawWheel(currentRotation = 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        for (let i = 0; i < items.length; i++) {
-            const startAngle = startAngles[i] + currentRotation;
-            // Đã fix lỗi startAngles[i] ở dòng này giúp hiển thị màu chính xác
-            const endAngle = (i === items.length - 1 ? startAngles[0] + 2 * Math.PI : startAngles[i+1]) + currentRotation;
-            
-            // Tiến hành vẽ nan quạt màu sắc
-            ctx.beginPath();
-            ctx.moveTo(center, center);
-            ctx.arc(center, center, radius, startAngle, endAngle);
-            ctx.closePath();
-            ctx.fillStyle = items[i].color;
-            ctx.fill();
-            
-            // Vẽ đường chia ô màu trắng tinh tế
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-
-            // Căn tọa độ viết chữ xuôi mắt đọc từ tâm hướng ra ngoài
-            ctx.save();
-            ctx.translate(center, center);
-            const middleAngle = startAngle + (endAngle - startAngle) / 2;
-            ctx.rotate(middleAngle);
-            
-            ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 15px 'Segoe UI', Arial, sans-serif";
-            ctx.textAlign = "left";
-            ctx.textBaseline = "middle";
-            ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-            ctx.shadowBlur = 4;
-            
-            // Đặt khoảng cách chữ cách tâm vòng quay 65px
-            ctx.fillText(items[i].text, 65, 0);
-            ctx.restore();
-        }
-
-        // Vẽ vòng tròn trắng nhỏ che ở tâm
-        ctx.beginPath();
-        ctx.arc(center, center, 44, 0, 2 * Math.PI);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-    }
-
-    // Vẽ kết quả tĩnh ban đầu
-    drawWheel(0);
-
-    let isSpinning = false;
-
-    // Thuật toán chọn đáp án ngẫu nhiên chuẩn theo tỷ lệ cấu hình
-    function pickRewardByProbability() {
+    // Thuật toán bốc ngẫu nhiên dựa trên phần trăm ở các lượt sau
+    function getRandomAnswer() {
         const rand = Math.random() * 100;
         let cumulative = 0;
-        for (let i = 0; i < items.length; i++) {
-            cumulative += items[i].weight;
-            if (rand <= cumulative) return i;
+        for (let i = 0; i < answers.length; i++) {
+            cumulative += answers[i].weight;
+            if (rand <= cumulative) return answers[i];
         }
-        return 0;
+        return answers[0];
     }
 
-    // Xử lý sự kiện bấm nút QUAY
-    spinBtn.addEventListener('click', () => {
-        if (isSpinning) return;
-        isSpinning = true;
+    function handleOpen() {
+        if (isOpen) {
+            // Nếu đang mở mà bấm lại thì đóng hộp để chơi lượt mới
+            isOpen = false;
+            giftBox.style.display = 'block';
+            resultCard.style.display = 'none';
+            actionBtn.innerText = 'MỞ HỘP QUÀ';
+            actionBtn.style.background = 'linear-gradient(135deg, #ff6b81 0%, #ff4757 100%)';
+            actionBtn.style.boxShadow = '0 8px 15px rgba(255, 107, 129, 0.4)';
+        } else {
+            // Xử lý mở quà
+            isOpen = true;
+            let finalAns;
 
-        resultLabel.classList.remove('pulse');
-        resultLabel.style.color = '#fff';
-        resultLabel.innerText = "🔮 Đang giải mã tính cách...";
-        spinBtn.disabled = true;
-
-        const targetIndex = pickRewardByProbability();
-        const selected = items[targetIndex];
-
-        const nextIdx = (targetIndex === items.length - 1) ? 0 : targetIndex + 1;
-        const targetStart = startAngles[targetIndex];
-        const targetEnd = (targetIndex === items.length - 1) ? 2 * Math.PI : startAngles[nextIdx];
-        const midSegment = targetStart + (targetEnd - targetStart) / 2;
-
-        // Tính toán góc dừng khớp chuẩn xác với vị trí mũi kim đỉnh 12h
-        const stopAngle = (1.5 * Math.PI) - midSegment;
-        const totalRotationTarget = (Math.PI * 2 * (6 + Math.floor(Math.random() * 2))) + stopAngle;
-
-        let startTime = null;
-        const duration = 5000; 
-        let lastTickAngle = 0;
-
-        function animateWheel(timestamp) {
-            if (!startTime) startTime = timestamp;
-            const elapsed = timestamp - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-
-            // Hàm tạo hiệu ứng phanh hãm tốc mượt mà giảm dần
-            const easeOutProgress = 1 - Math.pow(1 - progress, 3);
-            const currentRotation = easeOutProgress * totalRotationTarget;
-
-            if (currentRotation - lastTickAngle > 0.22 && progress < 0.92) {
-                playTickSound();
-                lastTickAngle = currentRotation;
+            if (isFirstTurn) {
+                // Đảm bảo lượt đầu tiên bắt buộc phải là CUTE
+                finalAns = answers[0]; 
+                isFirstTurn = false; // Tắt chế độ lượt đầu
+            } else {
+                // Các lượt tiếp theo tính toán công bằng theo % tỷ lệ
+                finalAns = getRandomAnswer();
             }
 
-            drawWheel(currentRotation);
+            // Gán dữ liệu đáp án vào giao diện
+            resText.innerText = finalAns.text;
+            resText.style.color = finalAns.color;
+            resEmoji.innerText = finalAns.emoji;
 
-            if (progress < 1) {
-                requestAnimationFrame(animateWheel);
-            } else {
-                isSpinning = false;
-                spinBtn.disabled = false;
-// Hiển thị kết quả cuối cùng
-resultLabel.innerHTML = Kết quả bạn là: <span style="color: ${selected.color}; background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 8px;">${selected.text}</span>;
-resultLabel.classList.add('pulse');
-// Bắn pháo hoa ăn mừng hai bên góc màn hình
-confetti({ particleCount: 80, spread: 60, origin: { x: 0.2, y: 0.6 } });
-confetti({ particleCount: 80, spread: 60, origin: { x: 0.8, y: 0.6 } });
-}
-}
-requestAnimationFrame(animateWheel);
-});
+            // Ẩn hộp quà, hiện hình ảnh chữ đáp án ra
+            giftBox.style.display = 'none';
+            resultCard.style.display = 'flex';
+            
+            // Đổi nút bấm thành Chơi lại
+            actionBtn.innerText = 'THỬ LẠI LƯỢT KHÁC';
+            actionBtn.style.background = 'linear-gradient(135deg, #2f3640 0%, #718093 100%)';
+            actionBtn.style.boxShadow = '0 8px 15px rgba(0,0,0,0.15)';
+
+            // Bắn pháo hoa ăn mừng cực mạnh
+            confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+        }
+    }
+
+    // Bấm nút hoặc bấm thẳng vào hộp quà đều được
+    actionBtn.addEventListener('click', handleOpen);
+    giftBox.addEventListener('click', handleOpen);
+</script>
+
+</body>
+</html>
